@@ -36,32 +36,32 @@ const SecondRound: React.FC = () => {
   }
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-500 pb-12">
-      <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-        <div className="flex flex-col md:flex-row justify-between items-start mb-6">
+    <div className="space-y-6 sm:space-y-8 animate-in fade-in duration-500 pb-12">
+      <div className="bg-white p-4 sm:p-6 rounded-xl shadow-sm border border-gray-100">
+        <div className="flex flex-col sm:flex-row justify-between items-start mb-6">
           <div>
             <h2 className="text-xl font-bold text-gray-900 mb-2">Escenarios de 2ª Vuelta</h2>
-            <p className="text-gray-500">Enfrentamientos directos con simulador de transferencia.</p>
+            <p className="text-gray-500 text-sm sm:text-base">Enfrentamientos directos con simulador de transferencia.</p>
           </div>
           <button 
              onClick={handleExport}
-             className="mt-4 md:mt-0 flex items-center space-x-2 text-sm font-medium text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 px-3 py-2 rounded-lg transition-colors"
+             className="mt-4 sm:mt-0 flex items-center space-x-2 text-sm font-medium text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 px-3 py-2 rounded-lg transition-colors w-full sm:w-auto justify-center"
           >
             <FileDown size={18} />
-            <span>CSV</span>
+            <span>Descargar CSV</span>
           </button>
         </div>
 
         {/* Simulation Controls */}
-        <div className="bg-slate-50 border border-slate-200 rounded-xl p-5 mb-8">
+        <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 sm:p-5 mb-8">
            <div className="flex items-center mb-4">
              <Sliders className="w-5 h-5 mr-2 text-slate-700" />
              <h3 className="font-bold text-slate-800">Simulador de Transferencia de Votos</h3>
            </div>
            
-           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
              <div>
-               <label className="block text-xs font-semibold text-slate-500 uppercase mb-2">
+               <label className="block text-xs font-semibold text-slate-500 uppercase mb-3">
                  Distribución de Indecisos (NS/NR)
                </label>
                <input 
@@ -70,16 +70,16 @@ const SecondRound: React.FC = () => {
                  max="100" 
                  value={undecidedSplit} 
                  onChange={(e) => setUndecidedSplit(Number(e.target.value))}
-                 className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
+                 className="w-full h-4 sm:h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-600 touch-pan-y"
                />
-               <div className="flex justify-between text-xs mt-1 text-slate-600 font-medium">
+               <div className="flex justify-between text-xs mt-2 text-slate-600 font-medium">
                  <span>{100 - undecidedSplit}% Candidato 1</span>
                  <span>{undecidedSplit}% Candidato 2</span>
                </div>
              </div>
 
              <div>
-               <label className="block text-xs font-semibold text-slate-500 uppercase mb-2">
+               <label className="block text-xs font-semibold text-slate-500 uppercase mb-3">
                  Reducción Voto Blanco/Nulo
                </label>
                <input 
@@ -88,22 +88,22 @@ const SecondRound: React.FC = () => {
                  max="50" 
                  value={nullVoteReduction} 
                  onChange={(e) => setNullVoteReduction(Number(e.target.value))}
-                 className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-green-600"
+                 className="w-full h-4 sm:h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-green-600 touch-pan-y"
                />
-               <div className="flex justify-between text-xs mt-1 text-slate-600 font-medium">
+               <div className="flex justify-between text-xs mt-2 text-slate-600 font-medium">
                  <span>0% Conversión</span>
                  <span>{nullVoteReduction}% se vuelven válidos</span>
                </div>
              </div>
            </div>
 
-           <div className="mt-4 flex justify-end">
+           <div className="mt-6 flex justify-end">
              <button 
                onClick={() => { setUndecidedSplit(50); setNullVoteReduction(0); }}
-               className="text-xs flex items-center text-slate-500 hover:text-red-600 transition-colors"
+               className="text-xs flex items-center text-slate-500 hover:text-red-600 transition-colors py-2 px-3 border border-slate-200 rounded bg-white"
              >
                <RefreshCw size={12} className="mr-1" />
-               Resetear Simulación
+               Resetear Parámetros
              </button>
            </div>
         </div>
@@ -118,7 +118,7 @@ const SecondRound: React.FC = () => {
             const addedToC1_fromNS = (indecisos * (100 - undecidedSplit)) / 100;
             const addedToC2_fromNS = (indecisos * undecidedSplit) / 100;
 
-            // Calculate redistributed votes from Null (assuming simplified even split for demo)
+            // Calculate redistributed votes from Null
             const votesFromNull = (nulos * nullVoteReduction) / 100;
             const addedToC1_fromNull = votesFromNull / 2;
             const addedToC2_fromNull = votesFromNull / 2;
@@ -133,31 +133,31 @@ const SecondRound: React.FC = () => {
 
             return (
               <div key={index} className="border-b border-gray-100 last:border-0 pb-12 last:pb-0">
-                {/* Simulated Intention Bar */}
-                <div className="flex justify-between items-end mb-2">
-                  <div className="text-left">
+                {/* Simulated Intention Bar - Responsive Layout */}
+                <div className="flex flex-col sm:flex-row justify-between items-center sm:items-end mb-4 gap-4 sm:gap-0">
+                  <div className="text-center sm:text-left w-full sm:w-auto order-1 sm:order-none">
                     <span className="block text-4xl font-bold" style={{color: scenario.candidate1.color}}>
                       {simC1}%
                     </span>
                     <span className="text-base font-semibold text-gray-900">{scenario.candidate1.name}</span>
                     {Number(simC1) > scenario.candidate1.percentage && (
-                       <span className="block text-xs text-green-600 font-medium">+{ (Number(simC1) - scenario.candidate1.percentage).toFixed(1) }% proyectado</span>
+                       <span className="block text-xs text-green-600 font-medium">+{ (Number(simC1) - scenario.candidate1.percentage).toFixed(1) }%</span>
                     )}
                   </div>
                   
-                  <div className="text-center">
-                    <div className="text-xs text-gray-400 pb-2 bg-gray-50 px-3 py-1 rounded-full uppercase tracking-wider font-semibold">
-                      Escenario Simulado
+                  <div className="text-center w-full sm:w-auto order-3 sm:order-none">
+                    <div className="text-[10px] sm:text-xs text-gray-400 pb-2 bg-gray-50 px-3 py-1 rounded-full uppercase tracking-wider font-semibold inline-block">
+                      Simulado
                     </div>
                   </div>
 
-                  <div className="text-right">
+                  <div className="text-center sm:text-right w-full sm:w-auto order-2 sm:order-none">
                     <span className="block text-4xl font-bold" style={{color: scenario.candidate2.color}}>
                       {simC2}%
                     </span>
                     <span className="text-base font-semibold text-gray-900">{scenario.candidate2.name}</span>
                     {Number(simC2) > scenario.candidate2.percentage && (
-                       <span className="block text-xs text-green-600 font-medium">+{ (Number(simC2) - scenario.candidate2.percentage).toFixed(1) }% proyectado</span>
+                       <span className="block text-xs text-green-600 font-medium">+{ (Number(simC2) - scenario.candidate2.percentage).toFixed(1) }%</span>
                     )}
                   </div>
                 </div>
