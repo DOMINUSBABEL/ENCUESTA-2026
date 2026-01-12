@@ -1,15 +1,52 @@
-import React from 'react';
-import { Users, Calendar, Target, Activity } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Users, Calendar, Target, Activity, FileDown, Loader2 } from 'lucide-react';
 import StatCard from '../components/StatCard';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import { SCENARIO_1, MAIN_PROBLEMS } from '../constants';
+import CustomTooltip from '../components/CustomTooltip';
+import { exportToCSV } from '../utils';
 
 const Overview: React.FC = () => {
+  const [isLoading, setIsLoading] = useState(true);
   const topCandidates = SCENARIO_1.candidates.slice(0, 5);
   const topProblems = MAIN_PROBLEMS.slice(0, 5);
 
+  useEffect(() => {
+    // Simulate data loading
+    const timer = setTimeout(() => setIsLoading(false), 600);
+    return () => clearTimeout(timer);
+  }, []);
+
+  const handleExport = () => {
+    const dataToExport = SCENARIO_1.candidates.map(c => ({
+      Candidato: c.name,
+      Porcentaje: c.percentage
+    }));
+    exportToCSV(dataToExport, 'resumen_candidatos_atlas_2026');
+  };
+
+  if (isLoading) {
+    return (
+      <div className="h-96 flex flex-col items-center justify-center text-gray-400">
+        <Loader2 className="w-10 h-10 animate-spin mb-4 text-red-600" />
+        <p>Cargando análisis detallado...</p>
+      </div>
+    );
+  }
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-in fade-in duration-500">
+      <div className="flex justify-between items-center mb-2">
+         <h1 className="text-2xl font-bold text-gray-900">Resumen Ejecutivo</h1>
+         <button 
+           onClick={handleExport}
+           className="flex items-center space-x-2 text-sm font-medium text-blue-600 hover:text-blue-800 bg-blue-50 hover:bg-blue-100 px-4 py-2 rounded-lg transition-colors"
+         >
+           <FileDown size={18} />
+           <span>Exportar Datos</span>
+         </button>
+      </div>
+
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <StatCard 
           title="Tamaño de Muestra" 
@@ -43,14 +80,11 @@ const Overview: React.FC = () => {
           <h3 className="text-lg font-bold text-gray-900 mb-4">Líderes - Escenario 1</h3>
           <div className="h-64">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={topCandidates} layout="vertical" margin={{ left: 40 }}>
-                <CartesianGrid strokeDasharray="3 3" horizontal={false} />
+              <BarChart data={topCandidates} layout="vertical" margin={{ left: 40, right: 20 }}>
+                <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#e5e7eb" />
                 <XAxis type="number" hide />
                 <YAxis dataKey="name" type="category" width={100} tick={{fontSize: 12}} />
-                <Tooltip 
-                  formatter={(value: number) => [`${value}%`, 'Intención']}
-                  contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
-                />
+                <Tooltip content={<CustomTooltip formatter={(val) => [`${val}%`, 'Intención']} />} cursor={{fill: '#f9fafb'}} />
                 <Bar dataKey="percentage" radius={[0, 4, 4, 0]}>
                   {topCandidates.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={entry.color} />
@@ -64,16 +98,16 @@ const Overview: React.FC = () => {
         {/* Quick Snapshot: Main Problems */}
         <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
           <h3 className="text-lg font-bold text-gray-900 mb-4">Principales Problemas</h3>
-          <div className="space-y-4">
+          <div className="space-y-4 overflow-y-auto h-64 pr-2">
             {topProblems.map((problem, index) => (
-              <div key={index} className="relative">
+              <div key={index} className="relative group">
                 <div className="flex justify-between text-sm mb-1">
                   <span className="font-medium text-gray-700">{problem.issue}</span>
                   <span className="font-bold text-gray-900">{problem.percentage}%</span>
                 </div>
                 <div className="w-full bg-gray-100 rounded-full h-2.5">
                   <div 
-                    className="bg-slate-700 h-2.5 rounded-full" 
+                    className="bg-slate-700 h-2.5 rounded-full transition-all duration-1000 ease-out group-hover:bg-red-600" 
                     style={{ width: `${problem.percentage}%` }}
                   ></div>
                 </div>
@@ -83,9 +117,12 @@ const Overview: React.FC = () => {
         </div>
       </div>
       
-      <div className="bg-blue-50 border border-blue-100 p-4 rounded-lg text-sm text-blue-800">
-        <strong className="block mb-1">Nota Técnica:</strong>
-        Muestra recolectada mediante Atlas RDR (Random Digital Recruitment). Las muestras son post-estratificadas usando un algoritmo iterativo en un conjunto de variables: sexo, edad, nivel educativo, ingresos, región y comportamiento electoral anterior.
+      <div className="bg-blue-50 border border-blue-100 p-4 rounded-lg text-sm text-blue-800 flex items-start">
+        <Activity className="w-5 h-5 mr-3 mt-0.5 flex-shrink-0" />
+        <div>
+          <strong className="block mb-1">Nota Técnica:</strong>
+          Muestra recolectada mediante Atlas RDR (Random Digital Recruitment). Las muestras son post-estratificadas usando un algoritmo iterativo en un conjunto de variables: sexo, edad, nivel educativo, ingresos, región y comportamiento electoral anterior.
+        </div>
       </div>
     </div>
   );
