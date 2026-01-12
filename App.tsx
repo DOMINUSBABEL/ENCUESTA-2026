@@ -13,12 +13,12 @@ const App: React.FC = () => {
 
   const renderContent = () => {
     switch (activeTab) {
-      case 'overview': return <Overview />;
+      case 'overview': return <Overview setActiveTab={setActiveTab} />;
       case 'first_round': return <FirstRound />;
       case 'second_round': return <SecondRound />;
       case 'government': return <Government />;
       case 'methodology': return <Methodology />;
-      default: return <Overview />;
+      default: return <Overview setActiveTab={setActiveTab} />;
     }
   };
 

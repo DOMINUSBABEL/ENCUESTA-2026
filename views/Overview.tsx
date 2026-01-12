@@ -1,12 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { Users, Calendar, Target, Activity, FileDown, Loader2 } from 'lucide-react';
+import { Users, Calendar, Target, Activity, FileDown, Loader2, FileText } from 'lucide-react';
 import StatCard from '../components/StatCard';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import { SCENARIO_1, MAIN_PROBLEMS } from '../constants';
 import CustomTooltip from '../components/CustomTooltip';
 import { exportToCSV } from '../utils';
 
-const Overview: React.FC = () => {
+interface OverviewProps {
+  setActiveTab: (tab: string) => void;
+}
+
+const Overview: React.FC<OverviewProps> = ({ setActiveTab }) => {
   const [isLoading, setIsLoading] = useState(true);
   const topCandidates = SCENARIO_1.candidates.slice(0, 5);
   const topProblems = MAIN_PROBLEMS.slice(0, 5);
@@ -52,26 +56,37 @@ const Overview: React.FC = () => {
           title="Tamaño de Muestra" 
           value="4.520" 
           subtitle="Encuestados"
-          icon={<Users size={20} />} 
-        />
-        <StatCard 
-          title="Fecha de Recolección" 
-          value="05-08 Ene" 
-          subtitle="Año 2026"
-          icon={<Calendar size={20} />} 
+          icon={<Users size={20} />}
+          trend="neutral"
+          trendValue="Estable" 
         />
         <StatCard 
           title="Margen de Error" 
           value="±1 p.p." 
           subtitle="Nivel Confianza 95%"
-          icon={<Target size={20} />} 
+          icon={<Target size={20} />}
+          trend="neutral"
+          trendValue="--"
         />
         <StatCard 
           title="Método" 
           value="Atlas RDR" 
           subtitle="Reclutamiento Digital"
-          icon={<Activity size={20} />} 
+          icon={<Activity size={20} />}
+          trend="neutral"
+          trendValue="Validado"
         />
+        <div 
+          onClick={() => setActiveTab('methodology')}
+          className="cursor-pointer transition-transform hover:scale-105"
+        >
+          <StatCard 
+            title="Documentación" 
+            value="Ficha Técnica" 
+            subtitle="Ver detalles completos"
+            icon={<FileText size={20} />} 
+          />
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

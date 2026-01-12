@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { SCENARIO_1, SCENARIO_2, SCENARIO_1_DEMOGRAPHICS } from '../constants';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, Legend } from 'recharts';
-import { FileDown, Loader2 } from 'lucide-react';
+import { FileDown, Loader2, Filter } from 'lucide-react';
 import CustomTooltip from '../components/CustomTooltip';
 import { exportToCSV } from '../utils';
 
@@ -107,33 +107,44 @@ const FirstRound: React.FC = () => {
             </ResponsiveContainer>
           </div>
 
-          {/* Demographic Analysis (Only for S1 for now based on available data) */}
+          {/* Demographic Analysis */}
           {activeScenarioId === 's1' && (
             <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
+              <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 border-b border-gray-100 pb-4">
                 <div>
-                  <h3 className="text-lg font-bold text-gray-900">Análisis Demográfico (Top 3)</h3>
-                  <p className="text-sm text-gray-500">Comparativa entre los líderes de la encuesta</p>
+                  <h3 className="text-lg font-bold text-gray-900 flex items-center">
+                    <Filter className="w-5 h-5 mr-2 text-gray-400" />
+                    Desglose Demográfico
+                  </h3>
+                  <p className="text-sm text-gray-500 mt-1">Comparativa detallada entre líderes</p>
                 </div>
-                <select 
-                  value={demographicFilter}
-                  onChange={(e) => setDemographicFilter(e.target.value)}
-                  className="mt-4 sm:mt-0 form-select block w-full sm:w-auto pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md border"
-                >
+                
+                {/* Enhanced Filter UI */}
+                <div className="mt-4 md:mt-0 flex flex-wrap gap-2">
                   {SCENARIO_1_DEMOGRAPHICS.map(d => (
-                    <option key={d.category} value={d.category}>{d.category}</option>
+                    <button
+                      key={d.category}
+                      onClick={() => setDemographicFilter(d.category)}
+                      className={`px-3 py-1.5 text-sm font-medium rounded-full transition-colors ${
+                        demographicFilter === d.category
+                          ? 'bg-slate-900 text-white'
+                          : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                      }`}
+                    >
+                      {d.category}
+                    </button>
                   ))}
-                </select>
+                </div>
               </div>
 
               <div className="h-80">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={chartData}>
                     <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                    <XAxis dataKey="name" />
+                    <XAxis dataKey="name" tick={{fontSize: 12}} />
                     <YAxis />
                     <Tooltip content={<CustomTooltip />} cursor={{fill: '#f8fafc'}} />
-                    <Legend iconType="circle" />
+                    <Legend iconType="circle" wrapperStyle={{paddingTop: '10px'}} />
                     {candidatesToCompare.map(candidate => (
                       <Bar 
                         key={candidate} 
