@@ -21,6 +21,23 @@ export const SCENARIO_1: Scenario = {
   ]
 };
 
+// Historical Data (Synthetic for visualization purposes)
+export const HISTORICAL_DATA = [
+  { date: 'Oct 2025', 'Abelardo de la Espriella': 22.1, 'Iván Cepeda': 24.5, 'Sergio Fajardo': 11.2, 'Otros': 42.2 },
+  { date: 'Nov 2025', 'Abelardo de la Espriella': 24.8, 'Iván Cepeda': 25.1, 'Sergio Fajardo': 10.5, 'Otros': 39.6 },
+  { date: 'Dic 2025', 'Abelardo de la Espriella': 26.5, 'Iván Cepeda': 25.8, 'Sergio Fajardo': 9.8, 'Otros': 37.9 },
+  { date: 'Ene 2026', 'Abelardo de la Espriella': 28.0, 'Iván Cepeda': 26.5, 'Sergio Fajardo': 9.4, 'Otros': 36.1 },
+];
+
+// Candidate Attributes (Synthetic)
+export const CANDIDATE_ATTRIBUTES = [
+  { attribute: 'Economía', 'Abelardo de la Espriella': 85, 'Iván Cepeda': 45, 'Sergio Fajardo': 65 },
+  { attribute: 'Seguridad', 'Abelardo de la Espriella': 90, 'Iván Cepeda': 30, 'Sergio Fajardo': 50 },
+  { attribute: 'Salud', 'Abelardo de la Espriella': 60, 'Iván Cepeda': 75, 'Sergio Fajardo': 70 },
+  { attribute: 'Corrupción', 'Abelardo de la Espriella': 70, 'Iván Cepeda': 65, 'Sergio Fajardo': 80 },
+  { attribute: 'Empleo', 'Abelardo de la Espriella': 80, 'Iván Cepeda': 55, 'Sergio Fajardo': 60 },
+];
+
 // Demographic Data for Scenario 1 (From Page 8)
 export const SCENARIO_1_DEMOGRAPHICS: DemographicBreakdown[] = [
   {

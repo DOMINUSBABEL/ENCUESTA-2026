@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { RUNOFF_SCENARIOS } from '../constants';
-import { FileDown, Loader2, Trophy } from 'lucide-react';
+import { FileDown, Loader2, Trophy, Sliders, RefreshCw } from 'lucide-react';
 import { exportToCSV } from '../utils';
 
 const SecondRound: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
+  // Simulation State
+  const [undecidedSplit, setUndecidedSplit] = useState(50); // 50% split default
+  const [nullVoteReduction, setNullVoteReduction] = useState(0); // 0% reduction default
 
   useEffect(() => {
     const timer = setTimeout(() => setIsLoading(false), 500);
@@ -33,100 +36,160 @@ const SecondRound: React.FC = () => {
   }
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-500">
+    <div className="space-y-8 animate-in fade-in duration-500 pb-12">
       <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-        <div className="flex justify-between items-start mb-6">
+        <div className="flex flex-col md:flex-row justify-between items-start mb-6">
           <div>
             <h2 className="text-xl font-bold text-gray-900 mb-2">Escenarios de 2ª Vuelta</h2>
-            <p className="text-gray-500">Enfrentamientos directos hipotéticos.</p>
+            <p className="text-gray-500">Enfrentamientos directos con simulador de transferencia.</p>
           </div>
           <button 
              onClick={handleExport}
-             className="flex items-center space-x-2 text-sm font-medium text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 px-3 py-2 rounded-lg transition-colors"
+             className="mt-4 md:mt-0 flex items-center space-x-2 text-sm font-medium text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 px-3 py-2 rounded-lg transition-colors"
           >
             <FileDown size={18} />
             <span>CSV</span>
           </button>
         </div>
 
+        {/* Simulation Controls */}
+        <div className="bg-slate-50 border border-slate-200 rounded-xl p-5 mb-8">
+           <div className="flex items-center mb-4">
+             <Sliders className="w-5 h-5 mr-2 text-slate-700" />
+             <h3 className="font-bold text-slate-800">Simulador de Transferencia de Votos</h3>
+           </div>
+           
+           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+             <div>
+               <label className="block text-xs font-semibold text-slate-500 uppercase mb-2">
+                 Distribución de Indecisos (NS/NR)
+               </label>
+               <input 
+                 type="range" 
+                 min="0" 
+                 max="100" 
+                 value={undecidedSplit} 
+                 onChange={(e) => setUndecidedSplit(Number(e.target.value))}
+                 className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
+               />
+               <div className="flex justify-between text-xs mt-1 text-slate-600 font-medium">
+                 <span>{100 - undecidedSplit}% Candidato 1</span>
+                 <span>{undecidedSplit}% Candidato 2</span>
+               </div>
+             </div>
+
+             <div>
+               <label className="block text-xs font-semibold text-slate-500 uppercase mb-2">
+                 Reducción Voto Blanco/Nulo
+               </label>
+               <input 
+                 type="range" 
+                 min="0" 
+                 max="50" 
+                 value={nullVoteReduction} 
+                 onChange={(e) => setNullVoteReduction(Number(e.target.value))}
+                 className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-green-600"
+               />
+               <div className="flex justify-between text-xs mt-1 text-slate-600 font-medium">
+                 <span>0% Conversión</span>
+                 <span>{nullVoteReduction}% se vuelven válidos</span>
+               </div>
+             </div>
+           </div>
+
+           <div className="mt-4 flex justify-end">
+             <button 
+               onClick={() => { setUndecidedSplit(50); setNullVoteReduction(0); }}
+               className="text-xs flex items-center text-slate-500 hover:text-red-600 transition-colors"
+             >
+               <RefreshCw size={12} className="mr-1" />
+               Resetear Simulación
+             </button>
+           </div>
+        </div>
+
         <div className="space-y-12">
           {RUNOFF_SCENARIOS.map((scenario, index) => {
-            // Calculate effective vote (valid votes only)
-            const validVotes = scenario.candidate1.percentage + scenario.candidate2.percentage;
-            const c1Effective = ((scenario.candidate1.percentage / validVotes) * 100).toFixed(1);
-            const c2Effective = ((scenario.candidate2.percentage / validVotes) * 100).toFixed(1);
+            // SIMULATION LOGIC
+            const indecisos = scenario.nsNr;
+            const nulos = scenario.nullVote;
+            
+            // Calculate redistributed votes from undecided
+            const addedToC1_fromNS = (indecisos * (100 - undecidedSplit)) / 100;
+            const addedToC2_fromNS = (indecisos * undecidedSplit) / 100;
+
+            // Calculate redistributed votes from Null (assuming simplified even split for demo)
+            const votesFromNull = (nulos * nullVoteReduction) / 100;
+            const addedToC1_fromNull = votesFromNull / 2;
+            const addedToC2_fromNull = votesFromNull / 2;
+
+            // Final Simulated Percentages
+            const simC1 = (scenario.candidate1.percentage + addedToC1_fromNS + addedToC1_fromNull).toFixed(1);
+            const simC2 = (scenario.candidate2.percentage + addedToC2_fromNS + addedToC2_fromNull).toFixed(1);
+            
+            const totalSim = Number(simC1) + Number(simC2);
+            const winProbC1 = ((Number(simC1) / totalSim) * 100).toFixed(1);
+            const winProbC2 = ((Number(simC2) / totalSim) * 100).toFixed(1);
 
             return (
               <div key={index} className="border-b border-gray-100 last:border-0 pb-12 last:pb-0">
-                {/* Main Intention Bar */}
+                {/* Simulated Intention Bar */}
                 <div className="flex justify-between items-end mb-2">
                   <div className="text-left">
-                    <span className="block text-3xl font-bold" style={{color: scenario.candidate1.color}}>
-                      {scenario.candidate1.percentage}%
+                    <span className="block text-4xl font-bold" style={{color: scenario.candidate1.color}}>
+                      {simC1}%
                     </span>
                     <span className="text-base font-semibold text-gray-900">{scenario.candidate1.name}</span>
+                    {Number(simC1) > scenario.candidate1.percentage && (
+                       <span className="block text-xs text-green-600 font-medium">+{ (Number(simC1) - scenario.candidate1.percentage).toFixed(1) }% proyectado</span>
+                    )}
                   </div>
                   
-                  <div className="text-center text-xs text-gray-400 pb-2 bg-gray-50 px-3 py-1 rounded-full uppercase tracking-wider font-semibold">
-                    Intención Total
+                  <div className="text-center">
+                    <div className="text-xs text-gray-400 pb-2 bg-gray-50 px-3 py-1 rounded-full uppercase tracking-wider font-semibold">
+                      Escenario Simulado
+                    </div>
                   </div>
 
                   <div className="text-right">
-                    <span className="block text-3xl font-bold" style={{color: scenario.candidate2.color}}>
-                      {scenario.candidate2.percentage}%
+                    <span className="block text-4xl font-bold" style={{color: scenario.candidate2.color}}>
+                      {simC2}%
                     </span>
                     <span className="text-base font-semibold text-gray-900">{scenario.candidate2.name}</span>
+                    {Number(simC2) > scenario.candidate2.percentage && (
+                       <span className="block text-xs text-green-600 font-medium">+{ (Number(simC2) - scenario.candidate2.percentage).toFixed(1) }% proyectado</span>
+                    )}
                   </div>
                 </div>
 
-                <div className="h-4 w-full bg-gray-200 rounded-full overflow-hidden flex relative mb-6">
+                <div className="h-6 w-full bg-gray-100 rounded-full overflow-hidden flex relative mb-6 border border-gray-200">
                   <div 
-                    style={{ width: `${scenario.candidate1.percentage}%`, backgroundColor: scenario.candidate1.color }}
-                    className="h-full"
+                    style={{ width: `${winProbC1}%`, backgroundColor: scenario.candidate1.color }}
+                    className="h-full transition-all duration-500 ease-out"
                   />
+                  <div className="w-1 h-full bg-white z-10 absolute left-1/2 transform -translate-x-1/2 opacity-50"></div>
                   <div 
-                    style={{ width: `${scenario.nsNr + scenario.nullVote}%` }} 
-                    className="h-full bg-gray-300"
-                  />
-                  <div 
-                    style={{ width: `${scenario.candidate2.percentage}%`, backgroundColor: scenario.candidate2.color }}
-                    className="h-full"
+                    style={{ width: `${winProbC2}%`, backgroundColor: scenario.candidate2.color }}
+                    className="h-full transition-all duration-500 ease-out"
                   />
                 </div>
                 
                 {/* Win Probability / Effective Vote Projection */}
-                <div className="bg-slate-50 rounded-xl p-4 border border-slate-100">
+                <div className="bg-gradient-to-r from-slate-50 to-white rounded-xl p-4 border border-slate-100 shadow-sm">
                   <div className="flex items-center mb-3">
                      <Trophy className="w-4 h-4 text-yellow-500 mr-2" />
-                     <h4 className="text-sm font-bold text-slate-700 uppercase tracking-wide">Proyección Voto Válido</h4>
+                     <h4 className="text-sm font-bold text-slate-700 uppercase tracking-wide">Probabilidad de Victoria (Voto Válido)</h4>
                   </div>
                   
-                  <div className="flex items-center justify-between text-sm mb-1">
-                     <span className="font-medium text-slate-600">{c1Effective}%</span>
-                     <span className="font-medium text-slate-600">{c2Effective}%</span>
-                  </div>
-
-                  <div className="relative h-2 w-full bg-gray-200 rounded-full overflow-hidden flex">
-                    <div 
-                      style={{ width: `${c1Effective}%`, backgroundColor: scenario.candidate1.color, opacity: 0.8 }}
-                      className="h-full"
-                    ></div>
-                    <div className="w-0.5 h-full bg-white z-10 absolute left-1/2 transform -translate-x-1/2"></div>
-                    <div 
-                      style={{ width: `${c2Effective}%`, backgroundColor: scenario.candidate2.color, opacity: 0.8 }}
-                      className="h-full"
-                    ></div>
+                  <div className="flex items-center justify-between text-sm font-bold text-slate-800">
+                     <span>{winProbC1}%</span>
+                     <span>{winProbC2}%</span>
                   </div>
                   
                   <div className="flex justify-between mt-2 text-xs text-slate-400">
-                    <span>Sin blanco / nulo / indecisos</span>
-                    <span>Probabilidad estimada</span>
+                    <span>{scenario.candidate1.name}</span>
+                    <span>{scenario.candidate2.name}</span>
                   </div>
-                </div>
-
-                <div className="mt-4 flex justify-center space-x-6 text-xs text-gray-500">
-                  <span className="px-2 py-1 bg-gray-100 rounded">Blanco/Nulo: <strong className="text-gray-700">{scenario.nullVote}%</strong></span>
-                  <span className="px-2 py-1 bg-gray-100 rounded">NS/NR: <strong className="text-gray-700">{scenario.nsNr}%</strong></span>
                 </div>
               </div>
             );
